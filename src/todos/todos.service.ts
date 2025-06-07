@@ -1,30 +1,76 @@
 import { Injectable } from '@nestjs/common';
 
 import { DatabaseService } from 'src/database/database.service';
-import { Prisma } from '@prisma/client';
+
+import { CreateTodoDto, Status } from './dto/create-todo.dto';
+import { UpdateTodoDto } from './dto/update-todo.dto';
 
 @Injectable()
 export class TodosService {
   constructor(private readonly todoDb: DatabaseService) {}
 
-  async create(createTodoDto: Prisma.TodoCreateInput) {
-    const result = await this.todoDb.todo.create({ data: createTodoDto });
+  async create(createTodoDto: CreateTodoDto) {
+    const { userId, ...rest } = createTodoDto;
+
+    const result = await this.todoDb.todo.create({
+      data: {
+        ...rest,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+    });
+
     return result;
   }
 
-  findAll() {
-    return `This action returns all todos`;
+  async allTodoUser(id: number) {
+    const result = await this.todoDb.todo.findMany({
+      where: { userId: id },
+      include: { user: true },
+    });
+
+    return result;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} todo`;
+  async deleteSingleTodo({
+    userid,
+    todoid,
+  }: {
+    userid: number;
+    todoid: number;
+  }) {
+    const result = await this.todoDb.todo.delete({
+      where: { userId: userid, id: todoid },
+    });
+
+    return result;
   }
 
-  update(id: number, updateTodoDto: Prisma.TodoUpdateInput) {
-    return `This action updates a #${id} todo`;
+  async updateTodo({
+    userid,
+    todoid,
+    data,
+  }: {
+    userid: number;
+    todoid: number;
+    data: UpdateTodoDto;
+  }) {
+    const result = await this.todoDb.todo.update({
+      where: { userId: userid, id: todoid },
+      data,
+    });
+
+    return result;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} todo`;
+  async getTodoStatus({ userid, status }: { userid: number; status: Status }) {
+    const result = await this.todoDb.todo.findMany({
+      where: { userId: userid, status },
+    });
+
+    return result;
   }
 }

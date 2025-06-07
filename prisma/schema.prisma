@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-
 }
 
 datasource db {
@@ -14,14 +13,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id    Int    @id @default(autoincrement())
+  name  String
+  email String @unique
+  todo  Todo[]
+}
+
 model Todo {
-  id          Int     @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   title       String
   description String?
-  body String?
-  status    Status
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  body        String?
+  status      Status
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int 
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum Status {

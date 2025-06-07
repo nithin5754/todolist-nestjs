@@ -1,5 +1,9 @@
-import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
-
+import { IsString, IsNotEmpty, IsEnum, IsInt } from 'class-validator';
+export enum Status {
+  PROGRESS = 'PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+}
 export class CreateTodoDto {
   @IsString()
   @IsNotEmpty()
@@ -8,11 +12,13 @@ export class CreateTodoDto {
   @IsString()
   description: string;
 
-  
   @IsString()
   body: string;
 
-  @IsEnum(['PROGRESS', 'COMPLETED', 'CANCELLED'], {
+  @IsInt()
+  userId: number
+
+  @IsEnum(Status, {
     message: 'required valid status',
   })
   status: 'PROGRESS' | 'COMPLETED' | 'CANCELLED';
